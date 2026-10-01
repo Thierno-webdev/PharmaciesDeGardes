@@ -1,87 +1,66 @@
-package com.example.pharmaciedegarde.ui.pharmacies.components
+package com.autoformation.pharmaciesdegardes.ui.pharmacies.components
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.pharmaciedegarde.data.model.Pharmacie
+import com.autoformation.pharmaciesdegardes.ui.pharmacies.PharmacieItemUi
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PharmacieCard(
-    pharmacie: Pharmacie,
+    pharmacie: PharmacieItemUi,
+    queryMedicament: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         onClick = onClick,
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
+        modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     text = pharmacie.nom,
                     style = MaterialTheme.typography.titleMedium
                 )
                 if (pharmacie.estDeGarde) {
-                    SuggestionChip(
-                        onClick = {},
-                        label = { Text("De Garde", style = MaterialTheme.typography.labelSmall) },
-                        colors = SuggestionChipDefaults.suggestionChipColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
-                        )
+                    Text(
+                        text = "🟢 DE GARDE",
+                        color = Color(0xFF2E7D32),
+                        style = MaterialTheme.typography.labelMedium
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.LocationOn,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = Color.Gray
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "${pharmacie.quartier}, ${pharmacie.commune}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
-            }
-
             Spacer(modifier = Modifier.height(4.dp))
+            Text(text = "📍 Commune : ${pharmacie.commune}", style = MaterialTheme.typography.bodySmall)
+            Text(text = "📞 ${pharmacie.telephone}", style = MaterialTheme.typography.bodySmall)
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.Phone,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = Color.Gray
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = pharmacie.telephone,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
+            // Indication de la disponibilité en stock si une recherche de médicament est active
+            if (queryMedicament.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(8.dp))
+
+                val medsDispo = pharmacie.medicamentsEnStock.filter {
+                    it.nom.contains(queryMedicament, ignoreCase = true) ||
+                            it.nomCommercial.contains(queryMedicament, ignoreCase = true)
+                }
+
+                if (medsDispo.isNotEmpty()) {
+                    Text(
+                        text = "💊 Disponible en stock : ${medsDispo.joinToString { it.nom }}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }

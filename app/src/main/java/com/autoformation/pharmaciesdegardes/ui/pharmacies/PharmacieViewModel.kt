@@ -1,73 +1,97 @@
-package com.example.pharmaciedegarde.ui.pharmacies
+package com.autoformation.pharmaciesdegardes.ui.pharmacies
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.pharmaciedegarde.data.dao.PharmacieDao
-import com.example.pharmaciedegarde.data.model.Pharmacie
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.update
 
-class PharmacieViewModel(
-    private val pharmacieDao: PharmacieDao
-) : ViewModel() {
+class PharmacieViewModel : ViewModel() {
 
-    private val _uiState = MutableStateFlow<PharmacieUiState>(PharmacieUiState.Loading)
+    private val _uiState = MutableStateFlow(PharmacieUiState())
     val uiState: StateFlow<PharmacieUiState> = _uiState.asStateFlow()
 
-    private var allPharmacies: List<Pharmacie> = emptyList()
-    private var currentCommune: String? = null
-    private var isOnlyDeGarde: Boolean = false
+    // Données de test structurées selon le modèle de stock (Pharmacie <-> Stock <-> Medicament)
+    private val toutesLesPharmacies = listOf(
+        PharmacieItemUi(
+            id = "1",
+            nom = "Pharmacie Kipé",
+            commune = "Ratoma",
+            adresse = "Kipé Centre, en face de la mosquée",
+            telephone = "+224 620 00 00 00",
+            estDeGarde = true,
+            medicamentsEnStock = listOf(
+                MedicamentUi("m1", "Paracétamol", "Antalgique 500mg", "Doliprane"),
+                MedicamentUi("m2", "Amoxicilline", "Antibiotique 1g", "Clamoxyl"),
+                MedicamentUi("m3", "Ibuprofène", "Anti-inflammatoire 400mg", "Advique")
+            )
+        ),
+        PharmacieItemUi(
+            id = "2",
+            nom = "Pharmacie Boulbinet",
+            commune = "Kaloum",
+            adresse = "Avenue de la République",
+            telephone = "+224 621 11 22 33",
+            estDeGarde = true,
+            medicamentsEnStock = listOf(
+                MedicamentUi("m1", "Paracétamol", "Antalgique 500mg", "Doliprane"),
+                MedicamentUi("m4", "Oméprazole", "Anti-acide 20mg", "Mopral")
+            )
+        ),
+        PharmacieItemUi(
+            id = "3",
+            nom = "Pharmacie Lambanyi",
+            commune = "Ratoma",
+            adresse = "Carrefour Lambanyi",
+            telephone = "+224 622 33 44 55",
+            estDeGarde = false,
+            medicamentsEnStock = listOf(
+                MedicamentUi("m2", "Amoxicilline", "Antibiotique 1g", "Clamoxyl")
+            )
+        )
+    )
 
     init {
-        loadPharmacies()
-    }
-
-    fun loadPharmacies() {
-        viewModelScope.launch {
-            _uiState.value = PharmacieUiState.Loading
-            pharmacieDao.getAllPharmacies()
-                .catch { e ->
-                    _uiState.value = PharmacieUiState.Error(e.message ?: "Erreur lors du chargement")
-                }
-                .collect { list ->
-                    allPharmacies = list
-                    applyFilters()
-                }
-        }
-    }
-
-    fun filterByCommune(commune: String?) {
-        currentCommune = commune
         applyFilters()
     }
 
-    fun toggleDeGardeFilter(deGardeOnly: Boolean) {
-        isOnlyDeGarde = deGardeOnly
+    fun onRechercheMedicamentChanged(query: String) {
+        _uiState.update { it.copy(rechercheMedicament = query) }
+        applyFilters()
+    }
+
+    fun onCommuneChanged(commune: String) {
+        _uiState.update { it.copy(communeSelectionnee = commune) }
+        applyFilters()
+    }
+
+    fun onDeGardeToggled(checked: Boolean) {
+        _uiState.update { it.copy(deGardeUniquement = checked) }
         applyFilters()
     }
 
     private fun applyFilters() {
-        var filteredList = allPharmacies
+        val state = _uiState.value
+        val queryMed = state.rechercheMedicament.trim().lowercase()
 
-        if (isOnlyDeGarde) {
-            filteredList = filteredList.filter { it.estDeGarde }
+        val resultat = toutesLesPharmacies.filter { pharmacie ->
+            // 1. Filtre Commune
+            val matchCommune = state.communeSelectionnee == "Toutes" ||
+                    pharmacie.commune.equals(state.communeSelectionnee, ignoreCase = true)
+
+            // 2. Filtre Garde
+            val matchGarde = !state.deGardeUniquement || pharmacie.estDeGarde
+
+            // 3. Filtre Médicament (Stock)
+            val matchMedicament = queryMed.isEmpty() || pharmacie.medicamentsEnStock.any { med ->
+                med.nom.lowercase().contains(queryMed) ||
+                        med.nomCommercial.lowercase().contains(queryMed) ||
+                        med.description.lowercase().contains(queryMed)
+            }
+
+            matchCommune && matchGarde && matchMedicament
         }
 
-        if (!currentCommune.isNullOrEmpty()) {
-            filteredList = filteredList.filter { it.commune.equals(currentCommune, ignoreCase = true) }
-        }
-
-        _uiState.value = if (filteredList.isEmpty()) {
-            PharmacieUiState.Empty
-        } else {
-            PharmacieUiState.Success(
-                pharmacies = filteredList,
-                selectedCommune = currentCommune,
-                isOnlyDeGarde = isOnlyDeGarde
-            )
-        }
+        _uiState.update { it.copy(pharmaciesAffichees = resultat) }
     }
 }

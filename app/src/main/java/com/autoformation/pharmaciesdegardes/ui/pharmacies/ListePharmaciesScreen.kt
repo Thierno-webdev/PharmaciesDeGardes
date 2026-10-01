@@ -1,86 +1,74 @@
-package com.example.pharmaciedegarde.ui.pharmacies
+package com.autoformation.pharmaciesdegardes.ui.pharmacies
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.pharmaciedegarde.ui.pharmacies.components.FilterChipRow
-import com.example.pharmaciedegarde.ui.pharmacies.components.PharmacieCard
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.autoformation.pharmaciesdegardes.ui.pharmacies.components.FilterChipRow
+import com.autoformation.pharmaciesdegardes.ui.pharmacies.components.PharmacieCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListePharmaciesScreen(
-    viewModel: PharmacieViewModel,
-    onPharmacieClick: (Int) -> Unit
+    viewModel: PharmacieViewModel = viewModel(),
+    onPharmacieClick: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val communesList = listOf("Kaloum", "Dixinn", "Matam", "Ratoma", "Matoto")
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Pharmacies") }) }
-    ) { paddingValues ->
+        topBar = {
+            TopAppBar(
+                title = { Text("Pharmacies & Médicaments") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            )
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
+                .padding(innerPadding)
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(16.dp)
         ) {
-            when (val state = uiState) {
-                is PharmacieUiState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
-                }
+            // Utilisation du composant réutilisable FilterChipRow
+            FilterChipRow(
+                rechercheMedicament = uiState.rechercheMedicament,
+                onRechercheChanged = { viewModel.onRechercheMedicamentChanged(it) },
+                deGardeUniquement = uiState.deGardeUniquement,
+                onDeGardeToggled = { viewModel.onDeGardeToggled(it) }
+            )
 
-                is PharmacieUiState.Error -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = state.message,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
-                }
+            Spacer(modifier = Modifier.height(16.dp))
 
-                is PharmacieUiState.Empty -> {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        FilterChipRow(
-                            communes = communesList,
-                            selectedCommune = null,
-                            isOnlyDeGarde = false,
-                            onCommuneSelected = { viewModel.filterByCommune(it) },
-                            onDeGardeToggled = { viewModel.toggleDeGardeFilter(it) }
-                        )
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("Aucune pharmacie ne correspond aux critères.")
-                        }
-                    }
-                }
-
-                is PharmacieUiState.Success -> {
-                    FilterChipRow(
-                        communes = communesList,
-                        selectedCommune = state.selectedCommune,
-                        isOnlyDeGarde = state.isOnlyDeGarde,
-                        onCommuneSelected = { viewModel.filterByCommune(it) },
-                        onDeGardeToggled = { viewModel.toggleDeGardeFilter(it) }
+            // Affichage des résultats
+            if (uiState.pharmaciesAffichees.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Aucune pharmacie ne dispose de ce médicament ou ne correspond à vos critères.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 16.dp)
-                    ) {
-                        items(state.pharmacies) { pharmacie ->
-                            PharmacieCard(
-                                pharmacie = pharmacie,
-                                onClick = { onPharmacieClick(pharmacie.id) }
-                            )
-                        }
+                }
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(uiState.pharmaciesAffichees) { pharmacie ->
+                        // Utilisation du composant réutilisable PharmacieCard
+                        PharmacieCard(
+                            pharmacie = pharmacie,
+                            queryMedicament = uiState.rechercheMedicament,
+                            onClick = { onPharmacieClick(pharmacie.id) }
+                        )
                     }
                 }
             }

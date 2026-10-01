@@ -1,17 +1,26 @@
-package com.example.pharmaciedegarde.ui.pharmacies
+package com.autoformation.pharmaciesdegardes.ui.pharmacies
 
-import com.example.pharmaciedegarde.data.model.Pharmacie
+data class MedicamentUi(
+    val id: String,
+    val nom: String,
+    val description: String = "",
+    val nomCommercial: String = ""
+)
 
-sealed interface PharmacieUiState {
-    object Loading : PharmacieUiState
+data class PharmacieItemUi(
+    val id: String,
+    val nom: String,
+    val commune: String,
+    val adresse: String,
+    val telephone: String,
+    val estDeGarde: Boolean,
+    val medicamentsEnStock: List<MedicamentUi> = emptyList()
+)
 
-    data class Success(
-        val pharmacies: List<Pharmacie>,
-        val selectedCommune: String? = null,
-        val isOnlyDeGarde: Boolean = false
-    ) : PharmacieUiState
-
-    object Empty : PharmacieUiState
-
-    data class Error(val message: String) : PharmacieUiState
-}
+data class PharmacieUiState(
+    val rechercheMedicament: String = "",
+    val communeSelectionnee: String = "Toutes",
+    val deGardeUniquement: Boolean = false,
+    val pharmaciesAffichees: List<PharmacieItemUi> = emptyList(),
+    val isLoading: Boolean = false
+)

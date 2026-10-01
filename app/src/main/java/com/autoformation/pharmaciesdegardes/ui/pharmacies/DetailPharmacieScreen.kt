@@ -1,31 +1,20 @@
-package com.example.pharmaciedegarde.ui.pharmacies
+package com.autoformation.pharmaciesdegardes.ui.pharmacies
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.pharmaciedegarde.data.model.Pharmacie
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailPharmacieScreen(
-    pharmacie: Pharmacie,
-    isFavorite: Boolean,
-    onToggleFavorite: (Int) -> Unit,
-    onBackClick: () -> Unit
+    pharmacie: PharmacieItemUi,
+    onBackClick: () -> Unit = {}
 ) {
-    val context = LocalContext.current
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -34,90 +23,59 @@ fun DetailPharmacieScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
                     }
-                },
-                actions = {
-                    IconButton(onClick = { onToggleFavorite(pharmacie.id) }) {
-                        Icon(
-                            imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = "Favori",
-                            tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                        )
-                    }
                 }
             )
         }
-    ) { paddingValues ->
+    ) { innerPadding ->
         Column(
             modifier = Modifier
+                .padding(innerPadding)
                 .fillMaxSize()
-                .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = pharmacie.nom, style = MaterialTheme.typography.headlineSmall)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = "Commune : ${pharmacie.commune}", style = MaterialTheme.typography.bodyMedium)
-                    Text(text = "Quartier : ${pharmacie.quartier}", style = MaterialTheme.typography.bodyMedium)
-                    Text(text = "Téléphone : ${pharmacie.telephone}", style = MaterialTheme.typography.bodyMedium)
+            Text(text = pharmacie.nom, style = MaterialTheme.typography.headlineMedium)
+            Text(text = "Adresse : ${pharmacie.adresse}", style = MaterialTheme.typography.bodyLarge)
+            Text(text = "Commune : ${pharmacie.commune}", style = MaterialTheme.typography.bodyLarge)
+            Text(text = "Téléphone : ${pharmacie.telephone}", style = MaterialTheme.typography.bodyLarge)
 
-                    Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(16.dp))
 
-                    if (pharmacie.estDeGarde) {
-                        Text(
-                            text = "Statut : DE GARDE",
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                        Text(
-                            text = "Période : Du ${pharmacie.debutGarde} au ${pharmacie.finGarde}",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    } else {
-                        Text(text = "Statut : Service Normal", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = "💊 Médicaments disponibles en stock",
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            pharmacie.medicamentsEnStock.forEach { med ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(text = "${med.nom} (${med.nomCommercial})", style = MaterialTheme.typography.titleSmall)
+                        if (med.description.isNotEmpty()) {
+                            Text(text = med.description, style = MaterialTheme.typography.bodySmall)
+                        }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.weight(1f))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+            Button(
+                onClick = { /* Déclencher l'appel via Intent */ },
+                modifier = Modifier.fillMaxWidth()
             ) {
-                // Action 1: Appel téléphonique
-                Button(
-                    onClick = {
-                        val intent = Intent(Intent.ACTION_DIAL).apply {
-                            data = Uri.parse("tel:${pharmacie.telephone}")
-                        }
-                        context.startActivity(intent)
-                    },
-                    modifier = Modifier.weight(1f).padding(end = 8.dp)
-                ) {
-                    Icon(Icons.Default.Phone, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Appeler")
-                }
-
-                // Action 2: Ouverture GPS / Carte
-                Button(
-                    onClick = {
-                        val gmmIntentUri = Uri.parse("geo:${pharmacie.latitude},${pharmacie.longitude}?q=${pharmacie.latitude},${pharmacie.longitude}(${Uri.encode(pharmacie.nom)})")
-                        val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri).apply {
-                            setPackage("com.google.android.apps.maps")
-                        }
-                        context.startActivity(mapIntent)
-                    },
-                    modifier = Modifier.weight(1f).padding(start = 8.dp)
-                ) {
-                    Icon(Icons.Default.LocationOn, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Itinéraire")
-                }
+                Icon(Icons.Default.Phone, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Appeler la pharmacie")
             }
         }
     }
