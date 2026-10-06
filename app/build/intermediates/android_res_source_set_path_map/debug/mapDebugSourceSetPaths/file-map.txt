@@ -1,0 +1,8 @@
+com.autoformation.pharmaciesdegardes.app-pngs-0 C:\Users\Mabinty\PharmaciesDeGardes\app\build\generated\res\pngs\debug
+com.autoformation.pharmaciesdegardes.app-updated_navigation_xml-1 C:\Users\Mabinty\PharmaciesDeGardes\app\build\generated\updated_navigation_xml\debug
+com.autoformation.pharmaciesdegardes.app-packageDebugResources-2 C:\Users\Mabinty\PharmaciesDeGardes\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.autoformation.pharmaciesdegardes.app-packageDebugResources-3 C:\Users\Mabinty\PharmaciesDeGardes\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.autoformation.pharmaciesdegardes.app-debug-4 C:\Users\Mabinty\PharmaciesDeGardes\app\build\intermediates\merged_res\debug\mergeDebugResources
+com.autoformation.pharmaciesdegardes.app-debug-5 C:\Users\Mabinty\PharmaciesDeGardes\app\src\debug\res
+com.autoformation.pharmaciesdegardes.app-main-6 C:\Users\Mabinty\PharmaciesDeGardes\app\src\main\res
+gradleHome-0 C:\Users\Mabinty\.gradle
