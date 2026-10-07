@@ -6,11 +6,10 @@ Application Android (MVP) conçue pour aider les utilisateurs à trouver rapidem
 
 ## 📱 Captures d'écran
 
-*(Ajoutez vos captures d'écran ici après les avoir placées dans un dossier `screenshots/`)*
 
-| Accueil & Tableau de bord | Liste des Pharmacies | Détail & Itinéraire | Recherche Médicaments |
+| Accueil & Tableau de bord | Liste des Pharmacies | Détail Pharmacie | Recherche Médicaments |
 | :---: | :---: | :---: | :---: |
-| <img src="screenshots/s1_welcome.png" width="200"/> | <img src="screenshots/s2_dashboard.png" width="200"/> | <img src="screenshots/detail.png" width="200"/> | <img src="screenshots/medicaments.png" width="200"/> |
+| ![Welcome](screenshots/s1_welcome.png) | ![Dashboard](screenshots/s2_dashboard.png) | ![Détail](screenshots/detail.png) | ![Médicaments](screenshots/medicaments.png) |
 
 ## ✨ Fonctionnalités Principales
 
@@ -49,7 +48,7 @@ L'application respecte strictement l'architecture **MVVM** (Model-View-ViewModel
 ### Étapes
 1.  Clonez ce dépôt Git :
     ```bash
-    git clone https://github.com/Mabintyfofana/projet_Pharma.git
+    git clone https://github.com/Thierno-webdev/PharmaciesDeGardes.git
     ```
 2.  Ouvrez le projet dans Android Studio.
 3.  Laissez Gradle synchroniser les dépendances.
@@ -61,10 +60,11 @@ L'application respecte strictement l'architecture **MVVM** (Model-View-ViewModel
 
 *(À compléter avec vos prénoms/noms selon vos rôles)*
 
-*   **Chef de projet et intégration** : [Nom]
-*   **Responsable données (Room)** : [Nom]
-*   **Responsable interface (UI/UX)** : [Nom]
-*   **Responsable logique et qualité** : [Nom]
+*   **Chef de projet & intégration** : Mabinty Fofana
+*   **Responsable données (Room)** : Antony Guotsop Nguessong
+*   **Responsable interface (Pharmacies)** : Mamadou Saliou Diallo
+*   **Responsable logique médicaments** : Mohammadou Mouctar Diallo
+*   **Responsable Dashboard & Favoris** : Thierno Abdoulaye Diakité
 
 ---
 *Réalisé dans le cadre de la formation Orange Digital Center Guinée - 2026.*
